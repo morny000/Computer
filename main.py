@@ -23,10 +23,27 @@ query = "SELECT *" \
         "WHERE Socket=?"
 cur.execute(query,(socket_ ,))
 for mother_plate in cur.fetchall():
-    print(f"id: {mother_plate[0]}, Название:  {mother_plate[1]}, Сокет: {mother_plate[2]}), Память: {mother_plate[3]}),Тип памяти: {mother_plate[4]}),Количество слотов памяти:{mother_plate[5]}),Разъем питнаия процесса:{mother_plate[6]})PCI экспресс:{mother_plate[7]}, Цена: {mother_plate[8]}")
+    print(f"id: {mother_plate[0]}, Название:  {mother_plate[1]}, Сокет: {mother_plate[2]}), Память: {mother_plate[3]}),Тип памяти: {mother_plate[4]}),Количество слотов памяти:{mother_plate[5]}),Разъем питнаия процесса:{mother_plate[6]})PCI-Express:{mother_plate[7]}, Цена: {mother_plate[8]}")
 motherplate_id = input("Введите id: ")
 for mother_plate in cur.fetchall():
         print(f"{mother_plate}")
+
+print("Выберите видеокарту")
+query = "SELECT PCI_Express " \
+    "FROM mother_plate " \
+    "WHERE id = ?"
+cur.execute(query, (motherplate_id, ))
+socket_ = cur.fetchone()[0]
+
+query = "SELECT *" \
+        "FROM video_card " \
+        "WHERE PCI_Express=?"
+cur.execute(query,(socket_ ,))
+for video_card in cur.fetchall():
+    print(f"id: {video_card[0]}, Название:  {video_card[1]}, Рекомендованный источник питания: {video_card[2]}), Размер: {video_card[3]}),PCI-Express: {video_card[4]}),Цена: {video_card[5]}")
+video_card_id = input("Введите id: ")
+for video_card in cur.fetchall():
+        print(f"{video_card}")
 
 
 print("Выберите жесткий диск ")
