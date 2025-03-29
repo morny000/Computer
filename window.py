@@ -371,16 +371,23 @@ class Ui_MainWindow(object):
         elif id == 4:
             con = sqlite3.connect("computer")
             cur = con.cursor()
-            query = "SELECT type_of_memory " \
-                    "FROM mother_plate " \
-                    "WHERE id = ?"
-            cur.execute(query, (self.motherboard_id,))
+            # даю query разные названия
+            query_type = "SELECT type_of_memory " \
+                         "FROM mother_plate " \
+                         "WHERE id = ?"
+            cur.execute(query_type, (self.motherboard_id,))
             type_memory_ = cur.fetchone()[0]
 
-            query = "SELECT *" \
-                    "FROM ram " \
-                    "WHERE type_of_memory=?"
-            cur.execute(query, (type_memory_,))
+            query_slots = "SELECT  number_of_memory_slots " \
+                          "FROM mother_plate " \
+                          "WHERE id = ?"
+            cur.execute(query_slots, (self.motherboard_id,))
+            number_slots_ = cur.fetchone()[0]
+
+            query_ram = "SELECT * " \
+                         "FROM ram " \
+                         "WHERE type_of_memory = ? AND number_of_memory_modules <= ?"
+            cur.execute(query_ram, (type_memory_, number_slots_))
             rams = cur.fetchall()
             self.ram_table.setRowCount(len(rams))
             self.ram_table.setColumnCount(len(rams[0]))
