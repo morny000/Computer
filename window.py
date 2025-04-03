@@ -251,6 +251,9 @@ class Ui_MainWindow(object):
     def choose_gpu(self, gpu_id):
         self.gpu_id = gpu_id
 
+    def choose_gpu(self, cooler_id):
+        self.cooler_id = cooler_id
+
     # чтобы перелистовать страницы
     def next_page(self):
         self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() + 1)
@@ -331,7 +334,7 @@ class Ui_MainWindow(object):
             self.gpu_table.setRowCount(len(gpus)) # устанавливает количество строк в таблице с платами
             self.gpu_table.setColumnCount(len(gpus[0])) # устанавливает количество столбцов в таблице равным количеству параметров
             self.gpu_table.setHorizontalHeaderLabels(
-                ["id", "Название", "Рекомендованный источник питания", "Размер", "PCI-Express", "Цена",])
+                ["id", "Название", "Рекомендованный источник питания", "Длина", "PCI-Express", "Цена",])
             self.gpu_comboBox.clear()  # очищает comboBox перед добавлением новых элементов
             for i, gpu in enumerate(gpus):
                 self.gpu_comboBox.addItem(str(gpu[0])) # добавляет элементы в gpu_comboBox
@@ -361,7 +364,7 @@ class Ui_MainWindow(object):
                 ["id", "Название", "Сокет", "Рассеиваемая мощность", "Высота", "Цена",])
             self.cooler_comboBox.clear()
             for i, cooler in enumerate(coolers):
-                self.cooler_comboBox.addItem(str(cooler[0]))
+                self.cooler_comboBox.addItem(str(cooler[0])) # если тут ошибка, значит нет подходящих комплектующих
                 for j, param in enumerate(cooler):
                     self.cooler_table.setItem(i, j, QtWidgets.QTableWidgetItem(str(param)))
 
@@ -485,7 +488,44 @@ class Ui_MainWindow(object):
             con.close()
 
         #КОРПУС
-        '''elif id == 8:'''
+        elif id == 8:
+            con = sqlite3.connect("computer")
+            cur = con.cursor()
+            query_cooler_height = "SELECT height " \
+                         "FROM cooler " \
+                         "WHERE id = ?"
+            cur.execute(query_cooler_height, (self.cooler_id,))
+            cooler_height = cur.fetchone()[0]
+
+            query_dimensions_videocard = "SELECT  dimensions " \
+                          "FROM video_card " \
+                          "WHERE id = ?"
+            cur.execute(query_dimensions_videocard, (self.gpu_id,))
+            dimensions_videocard_ = cur.fetchone()[0]
+
+            query_formfactor = "SELECT size " \
+                            "FROM mother_plate " \
+                            "WHERE id = ?"
+            cur.execute(query_formfactor, (self.motherboard_id,))
+            formfactor_motherboard = cur.fetchone()[0]
+
+            query_body = "SELECT * " \
+                         "FROM body " \
+                         "WHERE maximum_cooler_height > ? AND maximum_length_videocard > ?" #AND form_factor_compatible_boards = ?" это надо переписать
+            cur.execute(query_body, (cooler_height, dimensions_videocard_, formfactor_motherboard))
+            bodys = cur.fetchall()
+            self.body_table.setRowCount(len(bodys))
+            self.body_table.setColumnCount(len(bodys[0]))
+            self.body_table.setHorizontalHeaderLabels(
+                    ["id", "Название", "Совместимые форм-факторы материнских плат", "Максимальная длина блока питания","Максимальная длина видеокарты",
+                     "Максимальная высота кулера", "Вентиляторы в комплекте", "Цена",])
+            self.body_comboBox.clear()
+            for i, body in enumerate(bodys):
+                self.body_comboBox.addItem(str(body[0]))
+                for j, param in enumerate(body):
+                    self.body_table.setItem(i, j, QtWidgets.QTableWidgetItem(str(param)))
+
+            con.close()
 
 
 
