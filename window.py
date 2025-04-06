@@ -220,6 +220,26 @@ class Ui_MainWindow(object):
         self.gridLayout_10.addWidget(self.body_table, 0, 0, 1, 2)
         self.stackedWidget.addWidget(self.body)
 
+        self.result = QtWidgets.QWidget()
+        self.result.setObjectName("result")
+        self.gridLayout_11 = QtWidgets.QGridLayout(self.result)
+        self.gridLayout_11.setObjectName("gridLayout_2")
+        self.result_line = QtWidgets.QLineEdit(self.result)
+        self.result_line.setObjectName("result_line")
+        self.result_line.setReadOnly(True)
+        self.gridLayout_11.addWidget(self.result_line, 1, 1, 1, 1)
+        self.result_lable = QtWidgets.QLabel(self.result)
+        self.result_lable.setStyleSheet("")
+        self.result_lable.setObjectName("result_lable")
+        self.gridLayout_11.addWidget(self.result_lable, 1, 0, 1, 1)
+        self.result_table = QtWidgets.QTableWidget(self.result)
+        self.result_table.setStyleSheet("")
+        self.result_table.setObjectName("result_table")
+        self.result_table.setColumnCount(3)
+        self.result_table.setRowCount(9)
+        self.gridLayout_11.addWidget(self.result_table, 0, 0, 1, 2)
+        self.stackedWidget.addWidget(self.result)
+
         self.gridLayout.addWidget(self.stackedWidget, 0, 0, 1, 4)
         self.Back_button = QtWidgets.QPushButton(self.centralwidget)
         self.Back_button.setObjectName("Back_button")
@@ -231,7 +251,12 @@ class Ui_MainWindow(object):
         self.cpu_comboBox.currentTextChanged.connect(self.choose_cpu)
         self.motherboard_comboBox.currentTextChanged.connect(self.choose_motherboard)
         self.gpu_comboBox.currentTextChanged.connect(self.choose_gpu)
-
+        self.cooler_comboBox.currentTextChanged.connect(self.choose_cooler)
+        self.ram_comboBox.currentTextChanged.connect(self.choose_ram)
+        self.hdd_comboBox.currentTextChanged.connect(self.choose_hdd)
+        self.ssd_comboBox.currentTextChanged.connect(self.choose_ssd)
+        self.power_unit_comboBox.currentTextChanged.connect(self.choose_power_unit)
+        self.body_comboBox.currentTextChanged.connect(self.choose_body)
 
         self.retranslateUi(MainWindow)
         self.stackedWidget.setCurrentIndex(0)
@@ -251,8 +276,23 @@ class Ui_MainWindow(object):
     def choose_gpu(self, gpu_id):
         self.gpu_id = gpu_id
 
-    def choose_gpu(self, cooler_id):
+    def choose_cooler(self, cooler_id):
         self.cooler_id = cooler_id
+
+    def choose_ram(self, ram_id):
+        self.ram_id = ram_id
+
+    def choose_hdd(self, hdd_id):
+        self.hdd_id = hdd_id
+
+    def choose_ssd(self, ssd_id):
+        self.ssd_id = ssd_id
+
+    def choose_power_unit(self, power_unut_id):
+        self.power_unit_id = power_unut_id
+
+    def choose_body(self, body_id):
+        self.body_id = body_id
 
     # чтобы перелистовать страницы
     def next_page(self):
@@ -422,7 +462,7 @@ class Ui_MainWindow(object):
             self.hdd_table.setRowCount(len(hdds))
             self.hdd_table.setColumnCount(len(hdds[0]))
             self.hdd_table.setHorizontalHeaderLabels(
-                    ["id", "Название", "Тип памяти", "Тип модуля памяти", "Количество модулей в комплекте", "Объём памяти", "Цена",])
+                    ["id", "Название", "Энергопотребление", "Скорость передачи данных", "Объём памяти", "Цена"])
             self.hdd_comboBox.clear()
             for i, hdd in enumerate(hdds):
                 self.hdd_comboBox.addItem(str(hdd[0]))
