@@ -580,44 +580,30 @@ class Ui_MainWindow(object):
                 ("Жесткий диск", "hdd", self.hdd_id),
                 ("SSD", "SSD_m2", self.ssd_id),
                 ("Блок питания", "power_unit", self.power_unit_id),
-                ("Корпус", "body", self.body_id)
-            ]
+                ("Корпус", "body", self.body_id)]
 
-            total_price = 0
             self.result_table.setRowCount(len(components))
             self.result_table.setHorizontalHeaderLabels(["Тип", "Название", "Цена"])
+            self.result_line.clear()
+            total_price = 0
+            for row, (component_type, component_table, component_id) in enumerate(components):
+                    query = "SELECT name, cost " \
+                            f"FROM {component_table} " \
+                            "WHERE id = ?"
+                    cur.execute(query, (component_id,))
+                    results = cur.fetchone()
 
-            for row, (comp_type, table, comp_id) in enumerate(components):
-                if comp_id is None:
-                    continue
+                    if results:
+                        name, price = results
+                        total_price += price
+                        self.result_table.setItem(row, 0, QtWidgets.QTableWidgetItem(component_type))
+                        self.result_table.setItem(row, 1, QtWidgets.QTableWidgetItem(name))
+                        self.result_table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(price)))
 
-                try:
-                    query = f"SELECT name, cost FROM {table} WHERE id = ?"
-                    cur.execute(query, (comp_id,))
-                    result = cur.fetchone()
-
-                    if result:
-                        name, price_str = result  # Получаем цену как строку
-                        try:
-                            price = float(price_str)  # Пытаемся преобразовать в число с плавающей точкой
-                            total_price += price
-                            self.result_table.setItem(row, 0, QtWidgets.QTableWidgetItem(comp_type))
-                            self.result_table.setItem(row, 1, QtWidgets.QTableWidgetItem(name))
-                            self.result_table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(price)))
-                        except ValueError:
-                            print(f"Ошибка: Не удалось преобразовать цену '{price_str}' в число для {comp_type}.")
-                            # Можете добавить здесь обработку ошибки, например, пропустить этот компонент или установить цену в 0
-
-                except sqlite3.Error as e:
-                    print(f"Ошибка при получении данных для {table}: {e}")
+            self.result_line.setText("Итоговая цена " f"{total_price:} ₽")
 
             con.close()
 
-            # Устанавливаем общую цену
-            self.result_line.setText(f"{total_price:.2f} ₽")  # Форматируем вывод с двумя знаками после запятой
-
-            # Ресайзим колонки под содержимое
-            self.result_table.resizeColumnsToContents()
 
 
 
@@ -635,6 +621,7 @@ class Ui_MainWindow(object):
         self.ssd_lable.setText(_translate("MainWindow", "Выберите ID SSD"))
         self.power_unit_lable.setText(_translate("MainWindow", "Выберите ID блока питания"))
         self.body_lable.setText(_translate("MainWindow", "Выберите ID корпуса"))
+        self.result_lable.setText(_translate("MainWindow", "Итоговая цена"))
 
 
 if __name__ == "__main__":
