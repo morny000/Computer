@@ -220,26 +220,6 @@ class Ui_MainWindow(object):
         self.gridLayout_10.addWidget(self.body_table, 0, 0, 1, 2)
         self.stackedWidget.addWidget(self.body)
 
-        self.result = QtWidgets.QWidget()
-        self.result.setObjectName("result")
-        self.gridLayout_11 = QtWidgets.QGridLayout(self.result)
-        self.gridLayout_11.setObjectName("gridLayout_2")
-        self.result_line = QtWidgets.QLineEdit(self.result)
-        self.result_line.setObjectName("result_line")
-        self.result_line.setReadOnly(True)
-        self.gridLayout_11.addWidget(self.result_line, 1, 1, 1, 1)
-        self.result_lable = QtWidgets.QLabel(self.result)
-        self.result_lable.setStyleSheet("")
-        self.result_lable.setObjectName("result_lable")
-        self.gridLayout_11.addWidget(self.result_lable, 1, 0, 1, 1)
-        self.result_table = QtWidgets.QTableWidget(self.result)
-        self.result_table.setStyleSheet("")
-        self.result_table.setObjectName("result_table")
-        self.result_table.setColumnCount(3)
-        self.result_table.setRowCount(9)
-        self.gridLayout_11.addWidget(self.result_table, 0, 0, 1, 2)
-        self.stackedWidget.addWidget(self.result)
-
         self.gridLayout.addWidget(self.stackedWidget, 0, 0, 1, 4)
         self.Back_button = QtWidgets.QPushButton(self.centralwidget)
         self.Back_button.setObjectName("Back_button")
@@ -251,12 +231,6 @@ class Ui_MainWindow(object):
         self.cpu_comboBox.currentTextChanged.connect(self.choose_cpu)
         self.motherboard_comboBox.currentTextChanged.connect(self.choose_motherboard)
         self.gpu_comboBox.currentTextChanged.connect(self.choose_gpu)
-        self.cooler_comboBox.currentTextChanged.connect(self.choose_cooler)
-        self.ram_comboBox.currentTextChanged.connect(self.choose_ram)
-        self.hdd_comboBox.currentTextChanged.connect(self.choose_hdd)
-        self.ssd_comboBox.currentTextChanged.connect(self.choose_ssd)
-        self.power_unit_comboBox.currentTextChanged.connect(self.choose_power_unit)
-        self.body_comboBox.currentTextChanged.connect(self.choose_body)
 
 
         self.retranslateUi(MainWindow)
@@ -277,23 +251,8 @@ class Ui_MainWindow(object):
     def choose_gpu(self, gpu_id):
         self.gpu_id = gpu_id
 
-    def choose_cooler(self, cooler_id):
+    def choose_gpu(self, cooler_id):
         self.cooler_id = cooler_id
-
-    def choose_ram(self, ram_id):
-        self.ram_id = ram_id
-
-    def choose_hdd(self, hdd_id):
-        self.hdd_id = hdd_id
-
-    def choose_ssd(self, ssd_id):
-        self.ssd_id = ssd_id
-
-    def choose_power_unit(self, power_unut_id):
-        self.power_unit_id = power_unut_id
-
-    def choose_body(self, body_id):
-        self.body_id = body_id
 
     # чтобы перелистовать страницы
     def next_page(self):
@@ -518,8 +477,8 @@ class Ui_MainWindow(object):
             self.power_unit_table.setRowCount(len(power_units))
             self.power_unit_table.setColumnCount(len(power_units[0]))
             self.power_unit_table.setHorizontalHeaderLabels(
-                ["id", "Название", "Тип памяти", "Тип модуля памяти", "Количество модулей в комплекте", "Объём памяти",
-                 "Цена", ])
+                ["id", "Название", "Мощность", "Сертифекат 80 PLUS", "Разъемы для питания видеокарты", "Форм-фактор",
+                 "Разъемы для питания процессора", "Цена"])
             self.power_unit_comboBox.clear()
             for i, power_unit in enumerate(power_units):
                 self.power_unit_comboBox.addItem(str(power_unit[0]))
@@ -544,16 +503,16 @@ class Ui_MainWindow(object):
             cur.execute(query_dimensions_videocard, (self.gpu_id,))
             dimensions_videocard_ = cur.fetchone()[0]
 
-            """query_formfactor = "SELECT size " \
+            query_formfactor = "SELECT size " \
                             "FROM mother_plate " \
                             "WHERE id = ?"
             cur.execute(query_formfactor, (self.motherboard_id,))
-            formfactor_motherboard = cur.fetchone()[0]"""
+            formfactor_motherboard = cur.fetchone()[0]
 
             query_body = "SELECT * " \
                          "FROM body " \
-                         "WHERE maximum_cooler_height > ? AND maximum_length_videocard > ?"
-            cur.execute(query_body, (cooler_height, dimensions_videocard_))
+                         "WHERE body.maximum_cooler_height >= ? AND body.maximum_length_videocard >= ? AND instr(body.form_factor_compatible_boards, ?)"
+            cur.execute(query_body, (cooler_height, dimensions_videocard_, formfactor_motherboard))
             bodys = cur.fetchall()
             self.body_table.setRowCount(len(bodys))
             self.body_table.setColumnCount(len(bodys[0]))
@@ -570,6 +529,8 @@ class Ui_MainWindow(object):
 
         #ВЫВОД
         elif id == 9:
+            con = sqlite3.connect("computer")
+            cur = con.cursor()
             components = [
                 ("Процессор", "cpu", self.cpu_id),
                 ("Материнская плата", "mother_plate", self.motherboard_id),
@@ -585,9 +546,6 @@ class Ui_MainWindow(object):
             total_price = 0
             self.result_table.setRowCount(len(components))
             self.result_table.setHorizontalHeaderLabels(["Тип", "Название", "Цена"])
-
-            con = sqlite3.connect("computer")
-            cur = con.cursor()
 
             for row, (comp_type, table, comp_id) in enumerate(components):
                 if comp_id is None:
@@ -620,7 +578,6 @@ class Ui_MainWindow(object):
 
             # Ресайзим колонки под содержимое
             self.result_table.resizeColumnsToContents()
-
 
 
 
